@@ -13,6 +13,7 @@ import { applyCheckboxIndexes } from '../../helpers/renderMarkdown';
 import { IntersectionObserverContext, KanbanContext, SortContext } from '../context';
 import { c, useGetDateColorFn, useGetTagColorFn } from '../helpers';
 import { DateColor, TagColor } from '../types';
+import { syncMarkdownPreviewVisibility } from './markdownVisibility';
 
 interface MarkdownRendererProps extends HTMLAttributes<HTMLDivElement> {
   className?: string;
@@ -272,11 +273,7 @@ export const MarkdownRenderer = memo(function MarkdownPreviewRenderer({
       if (dragManager.dragEntityId === entityManager.entityId) return;
       if (dragManager.dragEntityId === entityManager.parent.entityId) return;
 
-      if (preview.isVisible && !isVisible) {
-        preview.hide();
-      } else if (!preview.isVisible && isVisible) {
-        preview.show();
-      }
+      syncMarkdownPreviewVisibility(preview, isVisible);
     };
 
     if (entityId && view.previewCache.has(entityId)) {

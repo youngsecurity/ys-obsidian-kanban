@@ -1,22 +1,101 @@
-# Obsidian Kanban Plugin
+# YS Obsidian Kanban
 
-Create markdown-backed Kanban boards in [Obsidian](https://obsidian.md/)
+Young Security's maintained copy of the Markdown-backed Kanban plugin for Obsidian.
 
-- [Bugs, Issues, & Feature Requests](https://github.com/mgmeyers/obsidian-kanban/issues)
-- [Development Roadmap](https://github.com/mgmeyers/obsidian-kanban/projects/1)
+This independently owned repository preserves the upstream Git history through [`obsidian-community/obsidian-kanban`](https://github.com/obsidian-community/obsidian-kanban) release `2.0.51`, commit `8501981a1afacb4c8fc03ec60604aa5eedfbd857`. Young Security maintenance begins with `2.0.51+ys.1`.
 
-![Screen Shot 2021-09-16 at 12.58.22 PM.png](https://github.com/mgmeyers/obsidian-kanban/blob/main/docs/Assets/Screen%20Shot%202021-09-16%20at%2012.58.22%20PM.png)
+## Versioning
 
-![Screen Shot 2021-09-16 at 1.10.38 PM.png](https://github.com/mgmeyers/obsidian-kanban/blob/main/docs/Assets/Screen%20Shot%202021-09-16%20at%201.10.38%20PM.png)
+Young Security releases use:
 
-## Documentation
+```text
+X.Y.Z+ys.N
+```
 
-Find the plugin documentation here: [Obsidian Kanban Plugin Documentation](https://publish.obsidian.md/kanban/)
+- `X.Y.Z` identifies the adopted upstream base.
+- `N` starts at `1` and increments for Young Security changes.
+- Adopting a newer upstream base resets `N` to `1`.
+- This repository does not publish a bare `X.Y.Z` release as a Young Security release.
 
-## Support
+SemVer build metadata does not affect version precedence. GitHub tags distinguish `+ys.N` releases, but installers that ignore build metadata may require a manual update.
 
-If you find this plugin useful and would like to support its development, you can sponsor [me](https://github.com/mgmeyers) on Github, or buy me a coffee.
+## 2.0.51+ys.1 rendering fix
 
-[![GitHub Sponsors](https://img.shields.io/github/sponsors/mgmeyers?label=Sponsor&logo=GitHub%20Sponsors&style=for-the-badge)](https://github.com/sponsors/mgmeyers)
+Kanban 2.0.51 detached rendered Markdown whenever a card left a lane's observed viewport. Dynamic Markdown processors such as Tasks can populate or resize content asynchronously, leaving the cached placeholder measurement stale and causing a query card to appear blank after window resizing.
 
-<a href="https://www.buymeacoffee.com/mgme"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=mgme&button_colour=5F7FFF&font_colour=ffffff&font_family=Lato&outline_colour=000000&coffee_colour=FFDD00"></a>
+YS Obsidian Kanban keeps board-card Markdown mounted while retaining:
+
+- lane intersection tracking used by drag and drop;
+- restoration of previews detached by an older cached view;
+- table-view virtualization;
+- existing board Markdown, frontmatter, lanes, and cards;
+- compatibility with the Tasks plugin without modifying Tasks code.
+
+## Development
+
+Requirements:
+
+- Node.js 20
+- Bun for tests
+
+```bash
+npm install --ignore-scripts
+bun test
+npx eslint src/components/MarkdownRenderer/MarkdownRenderer.tsx src/components/MarkdownRenderer/markdownVisibility.ts
+npm run build
+```
+
+Release artifacts are generated at the repository root:
+
+- `main.js`
+- `manifest.json`
+- `styles.css`
+
+The inherited full-project typecheck and lint commands currently report upstream legacy errors unrelated to this fix. CI runs the focused regression tests, targeted lint, and production build.
+
+## Switching from upstream Kanban 2.0.51
+
+YS Obsidian Kanban retains the original plugin ID, `obsidian-kanban`, as a drop-in replacement. Existing board Markdown and `.obsidian/plugins/obsidian-kanban/data.json` settings remain in place.
+
+Do not install the upstream build and this maintained copy as separate active plugins. They register the same plugin ID, view type, and commands.
+
+### Manual installation
+
+1. Back up or commit your vault.
+2. Disable the existing **Kanban** plugin in Obsidian.
+3. Make a backup copy of `.obsidian/plugins/obsidian-kanban/`.
+4. Keep the existing `data.json` file.
+5. Replace only these files with assets from the YS Obsidian Kanban GitHub release:
+   - `main.js`
+   - `manifest.json`
+   - `styles.css`
+6. Reload Obsidian once, then enable **YS Kanban**.
+7. Verify existing boards, Tasks query cards, drag and drop, and both short and tall window heights.
+
+### BRAT installation
+
+While the plugin is disabled, add `youngsecurity/ys-obsidian-kanban` through BRAT. Confirm that BRAT installs the release under the existing `obsidian-kanban` plugin ID, reload Obsidian once, and then enable YS Kanban.
+
+### Restoring 2.0.51
+
+If needed, disable YS Kanban, restore the backed-up `main.js`, `manifest.json`, and `styles.css`, preserve `data.json`, reload Obsidian once, and re-enable Kanban.
+
+## Releases
+
+A GitHub release tag exactly matches the version in `manifest.json`, without a `v` prefix. The first Young Security tag is:
+
+```text
+2.0.51+ys.1
+```
+
+Each release provides:
+
+- `main.js`
+- `manifest.json`
+- `styles.css`
+
+## License and attribution
+
+The upstream license and Git history are preserved unchanged in this repository. See [`LICENSE.md`](LICENSE.md) for the applicable license text.
+
+Young Security modifications are identified by versioned commits and release notes beginning with `2.0.51+ys.1` on July 23, 2026.
