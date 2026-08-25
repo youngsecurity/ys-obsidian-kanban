@@ -1,6 +1,6 @@
 {
   "name": "ys-obsidian-kanban",
-  "version": "2.0.51+ys.1",
+  "version": "2.0.51+ys.2",
   "description": "Young Security maintained copy of the markdown-backed Kanban plugin for Obsidian.",
   "main": "main.js",
   "scripts": {
