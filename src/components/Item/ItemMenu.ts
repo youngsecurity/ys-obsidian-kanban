@@ -15,6 +15,7 @@ import {
   constructMenuTimePickerOnChange,
   constructTimePicker,
 } from './helpers';
+import { getMoveToLaneInsertionIndex } from './moveDestination';
 
 const illegalCharsRegEx = /[\\/:"*?<>|]+/g;
 const embedRegEx = /!?\[\[([^\]]*)\.[^\]]+\]\]/g;
@@ -277,7 +278,11 @@ export function useItemMenu({
               .onClick(() => {
                 if (path[0] === i) return;
                 stateManager.setState((boardData) => {
-                  return moveEntity(boardData, path, [i, 0]);
+                  const insertionIndex = getMoveToLaneInsertionIndex(
+                    stateManager.getSetting('new-card-insertion-method'),
+                    boardData.children[i].children.length
+                  );
+                  return moveEntity(boardData, path, [i, insertionIndex]);
                 });
               })
           );
