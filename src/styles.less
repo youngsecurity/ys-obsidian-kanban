@@ -715,6 +715,10 @@ button.kanban-plugin__new-item-button {
 
 .kanban-plugin__item-title {
   width: 100%;
+  // Allow the title to shrink below its content's min-content width so long
+  // unbreakable lines (e.g. code blocks) cannot push the card menu button
+  // outside the card's clipped bounds.
+  min-width: 0;
   line-height: var(--line-height-tight);
   margin-block-start: 1px;
 }
