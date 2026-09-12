@@ -35,7 +35,10 @@ export const ItemCheckbox = memo(function ItemCheckbox({
       const [itemStrings, checkChars, thisIndex] = updates;
       const replacements: Item[] = itemStrings.map((str, i) => {
         const next = stateManager.getNewItem(str, checkChars[i]);
-        if (i === thisIndex) next.id = item.id;
+        if (i === thisIndex) {
+          next.id = item.id;
+          next.data.pinned = !!item.data.pinned;
+        }
         return next;
       });
 

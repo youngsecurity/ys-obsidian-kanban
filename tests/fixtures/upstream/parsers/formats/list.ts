@@ -16,22 +16,21 @@ import {
   LaneTemplate,
 } from 'src/components/types';
 import { laneTitleWithMaxItems } from 'src/helpers';
-import { groupPinnedItems } from 'src/helpers/pinnedCards';
 import { defaultSort } from 'src/helpers/util';
 import { t } from 'src/lang/helpers';
 import { visit } from 'unist-util-visit';
 
-import { archiveString, completeString, settingsToCodeblock } from '../common';
-import { DateNode, FileNode, TimeNode, ValueNode } from '../extensions/types';
+import { archiveString, completeString, settingsToCodeblock } from 'src/parsers/common';
+import { DateNode, FileNode, TimeNode, ValueNode } from 'src/parsers/extensions/types';
 import {
   ContentBoundary,
   getNextOfType,
   getNodeContentBoundary,
   getPrevSibling,
   getStringFromBoundary,
-} from '../helpers/ast';
-import { hydrateItem, preprocessTitle } from '../helpers/hydrateBoard';
-import { extractInlineFields, taskFields } from '../helpers/inlineMetadata';
+} from 'src/parsers/helpers/ast';
+import { hydrateItem, preprocessTitle } from 'src/parsers/helpers/hydrateBoard';
+import { extractInlineFields, taskFields } from 'src/parsers/helpers/inlineMetadata';
 import {
   addBlockId,
   dedentNewLines,
@@ -42,20 +41,11 @@ import {
   removeBlockId,
   replaceBrs,
   replaceNewLines,
-} from '../helpers/parser';
-import { addPinnedMetadata, getPinnedMarkerRange } from '../helpers/pinnedMetadata';
-import { parseFragment } from '../parseMarkdown';
+} from 'src/parsers/helpers/parser';
+import { parseFragment } from 'src/parsers/parseMarkdown';
 
 interface TaskItem extends ListItem {
   checkChar?: string;
-}
-
-// Preserve offsets for subsequent AST-based removals without consuming line
-// breaks. The generic deletion helper can cross a newline into indentation.
-function maskMetadataRange(content: string, range: ContentBoundary): string {
-  const start = Math.max(0, Math.min(range.start, content.length));
-  const end = Math.max(start, Math.min(range.end, content.length));
-  return content.slice(0, start) + '\u0001'.repeat(end - start) + content.slice(end);
 }
 
 export function listItemToItemData(stateManager: StateManager, md: string, item: TaskItem) {
@@ -82,19 +72,7 @@ export function listItemToItemData(stateManager: StateManager, md: string, item:
     itemContent = '';
   }
 
-  const pinRange = getPinnedMarkerRange(md, item);
   let title = itemContent;
-  if (pinRange) {
-    const markerStart = pinRange.start - start;
-    const range = {
-      // Remove the single separator emitted with the marker, not user spacing.
-      start:
-        markerStart > 0 && itemContent[markerStart - 1] === ' ' ? markerStart - 1 : markerStart,
-      end: pinRange.end - start,
-    };
-    title = maskMetadataRange(title, range);
-    itemContent = itemContent.slice(0, range.start) + itemContent.slice(range.end);
-  }
   let titleSearch = '';
 
   visit(
@@ -112,9 +90,8 @@ export function listItemToItemData(stateManager: StateManager, md: string, item:
   );
 
   const itemData: ItemData = {
-    titleRaw: dedentNewLines(replaceBrs(removeBlockId(itemContent))),
+    titleRaw: removeBlockId(dedentNewLines(replaceBrs(itemContent))),
     blockId: undefined,
-    pinned: !!pinRange,
     title: '',
     titleSearch,
     titleSearchRaw: titleSearch,
@@ -143,13 +120,6 @@ export function listItemToItemData(stateManager: StateManager, md: string, item:
 
       if (genericNode.type === 'blockid') {
         itemData.blockId = genericNode.value;
-        if (pinRange) {
-          const blockStart = node.position.start.offset - itemBoundary.start;
-          title = maskMetadataRange(title, {
-            start: blockStart > 0 && title[blockStart - 1] === ' ' ? blockStart - 1 : blockStart,
-            end: node.position.end.offset - itemBoundary.start,
-          });
-        }
         return true;
       }
 
@@ -221,10 +191,7 @@ export function listItemToItemData(stateManager: StateManager, md: string, item:
     }
   );
 
-  itemData.title = preprocessTitle(
-    stateManager,
-    dedentNewLines(executeDeletion(title.split('\u0001').join('')))
-  );
+  itemData.title = preprocessTitle(stateManager, dedentNewLines(executeDeletion(title)));
 
   const firstLineEnd = itemData.title.indexOf('\n');
   const inlineFields = extractInlineFields(itemData.title, true);
@@ -333,16 +300,14 @@ export function astToUnhydratedBoard(
       } else {
         lanes.push({
           ...LaneTemplate,
-          children: groupPinnedItems(
-            (list as List).children.map((listItem) => {
-              const data = listItemToItemData(stateManager, md, listItem);
-              return {
-                ...ItemTemplate,
-                id: generateInstanceId(),
-                data,
-              };
-            })
-          ),
+          children: (list as List).children.map((listItem) => {
+            const data = listItemToItemData(stateManager, md, listItem);
+            return {
+              ...ItemTemplate,
+              id: generateInstanceId(),
+              data,
+            };
+          }),
           id: generateInstanceId(),
           data: {
             ...parseLaneTitle(title),
@@ -368,7 +333,7 @@ export function astToUnhydratedBoard(
 }
 
 export function updateItemContent(stateManager: StateManager, oldItem: Item, newContent: string) {
-  const md = `- [${oldItem.data.checkChar}] ${addBlockId(indentNewLines(addPinnedMetadata(newContent, oldItem.data.pinned)), oldItem)}`;
+  const md = `- [${oldItem.data.checkChar}] ${addBlockId(indentNewLines(newContent), oldItem)}`;
 
   const ast = parseFragment(stateManager, md);
   const itemData = listItemToItemData(stateManager, md, (ast.children[0] as List).children[0]);
@@ -436,7 +401,7 @@ export function reparseBoard(stateManager: StateManager, board: Board) {
 }
 
 function itemToMd(item: Item) {
-  return `- [${item.data.checkChar}] ${addBlockId(indentNewLines(addPinnedMetadata(item.data.titleRaw, item.data.pinned)), item)}`;
+  return `- [${item.data.checkChar}] ${addBlockId(indentNewLines(item.data.titleRaw), item)}`;
 }
 
 function laneToMd(lane: Lane) {

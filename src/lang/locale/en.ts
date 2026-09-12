@@ -234,6 +234,9 @@ const en = {
   'Insert card after': 'Insert card after',
   'Add label': 'Add label',
   'Move to top': 'Move to top',
+  'Pin to top': 'Pin to top',
+  'Unpin card': 'Unpin card',
+  'Pinned to top': 'Pinned to top',
   'Move to bottom': 'Move to bottom',
   'Move to list': 'Move to list',
 

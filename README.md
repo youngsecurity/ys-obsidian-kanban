@@ -31,6 +31,24 @@ YS Obsidian Kanban keeps board-card Markdown mounted while retaining:
 - existing board Markdown, frontmatter, lanes, and cards;
 - compatibility with the Tasks plugin without modifying Tasks code.
 
+## Pin cards to the top
+
+Use **Pin to top** in a card's menu to keep it above ordinary cards in its list. Pinned cards show a pin button immediately to the left of the card menu. Clicking it unpins the card without narrowing its content area.
+
+- New pins join the end of the pinned group. Unpinning moves a card just below that group.
+- Drag pinned cards to reorder them within the group. Ordinary cards cannot be moved above them.
+- Moving a pinned card to another list or board retains its pin and adds it after existing pins.
+- Duplicating a card creates an unpinned copy. List sorting leaves pinned cards in their existing order.
+- Archive entries retain their pin. This version restores archived cards through Markdown editing: move the archived task back into a list after its existing pinned cards. Reloading groups pins first while preserving Markdown order within each group.
+
+Pins use an optional first-line comment, before an existing block ID:
+
+```markdown
+- [ ] Tasks query <!-- ys-kanban:pinned --> ^card-id
+```
+
+For multiline cards or cards beginning with a code fence or other block content, the comment gets its own first line. This keeps Tasks query fences intact. The marker is omitted from the card editor and search text. Upstream 2.0.51 preserves the marker in parser/serializer round trips but does not enforce pin ordering.
+
 ## Development
 
 Requirements:
@@ -44,6 +62,14 @@ bun test
 npx eslint src/components/MarkdownRenderer/MarkdownRenderer.tsx src/components/MarkdownRenderer/markdownVisibility.ts
 npm run build
 ```
+
+Optional browser layout regression check:
+
+```bash
+bun run test:layout
+```
+
+This needs a separately installed Playwright and Chromium browser. If Playwright is installed outside the project, set `PLAYWRIGHT_MODULE` to its module entry point; `BROWSER_EXECUTABLE` can select an existing Chromium-compatible browser. The check renders the production card/menu components and styles with stubbed Obsidian APIs and representative content. It checks pin placement, unchanged content width, and pin/menu/copy clicks at several card widths. It does not load a vault or the Tasks plugin itself.
 
 Release artifacts are generated at the repository root:
 

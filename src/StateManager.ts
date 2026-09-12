@@ -6,6 +6,7 @@ import { KanbanView } from './KanbanView';
 import { KanbanSettings, SettingRetrievers } from './Settings';
 import { getDefaultDateFormat, getDefaultTimeFormat } from './components/helpers';
 import { Board, BoardTemplate, Item } from './components/types';
+import { normalizePinnedBoard } from './helpers/pinnedCards';
 import { ListFormat } from './parsers/List';
 import { BaseFormat, frontmatterKey, shouldRefreshBoard } from './parsers/common';
 import { getTaskStatusDone } from './parsers/helpers/inlineMetadata';
@@ -138,7 +139,9 @@ export class StateManager {
   setState(state: Board | ((board: Board) => Board), shouldSave: boolean = true) {
     try {
       const oldSettings = this.state?.data.settings;
-      const newState = typeof state === 'function' ? state(this.state) : state;
+      const newState = normalizePinnedBoard(
+        typeof state === 'function' ? state(this.state) : state
+      );
       const newSettings = newState?.data.settings;
 
       if (oldSettings && newSettings && shouldRefreshBoard(oldSettings, newSettings)) {

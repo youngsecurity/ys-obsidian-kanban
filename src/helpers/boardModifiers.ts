@@ -6,9 +6,6 @@ import { Path } from 'src/dnd/types';
 import {
   appendEntities,
   getEntityFromPath,
-  insertEntity,
-  moveEntity,
-  prependEntities,
   removeEntity,
   updateEntity,
   updateParentEntity,
@@ -16,6 +13,11 @@ import {
 
 import { generateInstanceId } from '../components/helpers';
 import { Board, DataTypes, Item, Lane } from '../components/types';
+import {
+  insertBoardEntities as insertEntity,
+  moveBoardEntity as moveEntity,
+  toggleItemPinned,
+} from './pinnedCards';
 
 export interface BoardModifiers {
   appendItems: (path: Path, items: Item[]) => void;
@@ -23,6 +25,7 @@ export interface BoardModifiers {
   insertItems: (path: Path, items: Item[]) => void;
   replaceItem: (path: Path, items: Item[]) => void;
   splitItem: (path: Path, items: Item[]) => void;
+  toggleItemPin: (path: Path) => void;
   moveItemToTop: (path: Path) => void;
   moveItemToBottom: (path: Path) => void;
   addLane: (lane: Lane) => void;
@@ -56,11 +59,13 @@ export function getBoardModifiers(view: KanbanView, stateManager: StateManager):
 
   return {
     appendItems: (path: Path, items: Item[]) => {
-      stateManager.setState((boardData) => appendEntities(boardData, path, items));
+      stateManager.setState((boardData) =>
+        insertEntity(boardData, [path[0], boardData.children[path[0]].children.length], items)
+      );
     },
 
     prependItems: (path: Path, items: Item[]) => {
-      stateManager.setState((boardData) => prependEntities(boardData, path, items));
+      stateManager.setState((boardData) => insertEntity(boardData, [path[0], 0], items));
     },
 
     insertItems: (path: Path, items: Item[]) => {
@@ -69,7 +74,7 @@ export function getBoardModifiers(view: KanbanView, stateManager: StateManager):
 
     replaceItem: (path: Path, items: Item[]) => {
       stateManager.setState((boardData) =>
-        insertEntity(removeEntity(boardData, path), path, items)
+        insertEntity(removeEntity(boardData, path), path, items, true)
       );
     },
 
@@ -77,6 +82,10 @@ export function getBoardModifiers(view: KanbanView, stateManager: StateManager):
       stateManager.setState((boardData) => {
         return insertEntity(removeEntity(boardData, path), path, items);
       });
+    },
+
+    toggleItemPin: (path: Path) => {
+      stateManager.setState((boardData) => toggleItemPinned(boardData, path));
     },
 
     moveItemToTop: (path: Path) => {
@@ -273,7 +282,9 @@ export function getBoardModifiers(view: KanbanView, stateManager: StateManager):
           });
         }
 
-        return insertEntity(boardData, path, [entityWithNewID]);
+        return insertEntity(boardData, path, [
+          update(entityWithNewID, { data: { pinned: { $set: false } } }),
+        ]);
       });
     },
   };

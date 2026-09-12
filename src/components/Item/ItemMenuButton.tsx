@@ -1,3 +1,4 @@
+import type { ComponentChildren } from 'preact';
 import Preact from 'preact/compat';
 import { Dispatch, StateUpdater } from 'preact/hooks';
 import { t } from 'src/lang/helpers';
@@ -7,12 +8,14 @@ import { c } from '../helpers';
 import { EditState, EditingState, isEditing } from '../types';
 
 interface ItemMenuButtonProps {
+  children?: ComponentChildren;
   editState: EditState;
   setEditState: Dispatch<StateUpdater<EditState>>;
   showMenu: (e: MouseEvent, internalLinkPath?: string) => void;
 }
 
 export const ItemMenuButton = Preact.memo(function ItemMenuButton({
+  children,
   editState,
   setEditState,
   showMenu,
@@ -29,6 +32,7 @@ export const ItemMenuButton = Preact.memo(function ItemMenuButton({
 
   return (
     <div {...ignoreAttr} className={c('item-postfix-button-wrapper')}>
+      {!isEditing(editState) && children}
       {isEditing(editState) ? (
         <a
           data-ignore-drag={true}

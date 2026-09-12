@@ -3,7 +3,7 @@ import { Menu, Platform, TFile, TFolder } from 'obsidian';
 import { Dispatch, StateUpdater, useCallback } from 'preact/hooks';
 import { StateManager } from 'src/StateManager';
 import { Path } from 'src/dnd/types';
-import { moveEntity } from 'src/dnd/util/data';
+import { moveBoardEntity as moveEntity } from 'src/helpers/pinnedCards';
 import { t } from 'src/lang/helpers';
 
 import { BoardModifiers } from '../../helpers/boardModifiers';
@@ -52,6 +52,11 @@ export function useItemMenu({
       });
 
       menu
+        .addItem((i) => {
+          i.setIcon(item.data.pinned ? 'lucide-pin-off' : 'lucide-pin')
+            .setTitle(item.data.pinned ? t('Unpin card') : t('Pin to top'))
+            .onClick(() => boardModifiers.toggleItemPin(path));
+        })
         .addItem((i) => {
           i.setIcon('lucide-file-plus-2')
             .setTitle(t('New note from card'))

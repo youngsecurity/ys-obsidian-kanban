@@ -1,6 +1,6 @@
 {
   "name": "ys-obsidian-kanban",
-  "version": "2.0.51+ys.3",
+  "version": "2.0.51+ys.5",
   "description": "Young Security maintained copy of the markdown-backed Kanban plugin for Obsidian.",
   "main": "main.js",
   "scripts": {
@@ -8,6 +8,7 @@
     "dev": "node esbuild.config.mjs",
     "build": "node esbuild.config.mjs production",
     "test": "bun test",
+    "test:layout": "bun scripts/test-pin-layout.mjs",
     "check:release-version": "node scripts/check-release-version.mjs",
     "lint": "eslint ./src/**/*.{ts,tsx}",
     "lint:fix": "eslint ./src/**/*.{ts,tsx} --fix",

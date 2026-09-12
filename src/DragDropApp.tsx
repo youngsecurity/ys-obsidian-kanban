@@ -11,14 +11,12 @@ import { Board, DataTypes, Item, Lane } from './components/types';
 import { DndContext } from './dnd/components/DndContext';
 import { DragOverlay } from './dnd/components/DragOverlay';
 import { Entity, Nestable } from './dnd/types';
-import {
-  getEntityFromPath,
-  insertEntity,
-  moveEntity,
-  removeEntity,
-  updateEntity,
-} from './dnd/util/data';
+import { getEntityFromPath, removeEntity, updateEntity } from './dnd/util/data';
 import { getBoardModifiers } from './helpers/boardModifiers';
+import {
+  insertBoardEntities as insertEntity,
+  moveBoardEntity as moveEntity,
+} from './helpers/pinnedCards';
 import KanbanPlugin from './main';
 import { frontmatterKey } from './parsers/common';
 import {

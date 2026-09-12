@@ -946,6 +946,33 @@ button.kanban-plugin__new-item-button {
   }
 }
 
+.kanban-plugin__item-postfix-button-wrapper {
+  position: relative;
+}
+
+.kanban-plugin__item-title:has(+ .kanban-plugin__item-postfix-button-wrapper .kanban-plugin__item-pin)::before {
+  // Let text flow around just the pin's corner, not a full-height icon column.
+  content: '';
+  float: inline-end;
+  width: 28px;
+  height: 24px;
+}
+
+.kanban-plugin__item-pin {
+  // Overlay the free space beside the menu instead of narrowing card content.
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: calc(100% + 4px);
+  width: 24px;
+  height: 24px;
+  padding: 4px;
+  color: var(--text-accent);
+
+  .kanban-plugin__icon {
+    display: flex;
+  }
+}
+
 .kanban-plugin__item-prefix-button-wrapper {
   flex-direction: column;
 }

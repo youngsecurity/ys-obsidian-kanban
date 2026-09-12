@@ -163,6 +163,8 @@ export function useSettingsMenu({ setEditState, path, lane }: UseSettingsMenuPar
             const isAsc = lane.data.sorted === LaneSort.TitleAsc;
 
             children.sort((a, b) => {
+              if (a.data.pinned || b.data.pinned)
+                return Number(!!b.data.pinned) - Number(!!a.data.pinned);
               if (isAsc) {
                 return b.data.title.localeCompare(a.data.title);
               }
@@ -199,6 +201,8 @@ export function useSettingsMenu({ setEditState, path, lane }: UseSettingsMenuPar
               const mod = lane.data.sorted === LaneSort.DateAsc ? -1 : 1;
 
               children.sort((a, b) => {
+                if (a.data.pinned || b.data.pinned)
+                  return Number(!!b.data.pinned) - Number(!!a.data.pinned);
                 const aDate: moment.Moment | undefined =
                   a.data.metadata.time || a.data.metadata.date;
                 const bDate: moment.Moment | undefined =
@@ -240,6 +244,8 @@ export function useSettingsMenu({ setEditState, path, lane }: UseSettingsMenuPar
               const desc = lane.data.sorted === LaneSort.TagsAsc ? true : false;
 
               children.sort((a, b) => {
+                if (a.data.pinned || b.data.pinned)
+                  return Number(!!b.data.pinned) - Number(!!a.data.pinned);
                 const tagsA = a.data.metadata.tags;
                 const tagsB = b.data.metadata.tags;
 
@@ -290,6 +296,8 @@ export function useSettingsMenu({ setEditState, path, lane }: UseSettingsMenuPar
                 const desc = lane.data.sorted === k + '-asc' ? true : false;
 
                 children.sort((a, b) => {
+                  if (a.data.pinned || b.data.pinned)
+                    return Number(!!b.data.pinned) - Number(!!a.data.pinned);
                   const valA = a.data.metadata.inlineMetadata?.find((m) => m.key === k);
                   const valB = b.data.metadata.inlineMetadata?.find((m) => m.key === k);
 

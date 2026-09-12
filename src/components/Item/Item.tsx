@@ -12,8 +12,10 @@ import {
 import { Droppable, useNestedEntityPath } from 'src/dnd/components/Droppable';
 import { DndManagerContext } from 'src/dnd/components/context';
 import { useDragHandle } from 'src/dnd/managers/DragManager';
+import { t } from 'src/lang/helpers';
 import { frontmatterKey } from 'src/parsers/common';
 
+import { Icon } from '../Icon/Icon';
 import { KanbanContext, SearchContext } from '../context';
 import { c } from '../helpers';
 import { EditState, EditingState, Item, isEditing } from '../types';
@@ -130,7 +132,26 @@ const ItemInner = memo(function ItemInner({
           editState={editState}
           isStatic={isStatic}
         />
-        <ItemMenuButton editState={editState} setEditState={setEditState} showMenu={showItemMenu} />
+        <ItemMenuButton editState={editState} setEditState={setEditState} showMenu={showItemMenu}>
+          {item.data.pinned && (
+            <button
+              type="button"
+              data-ignore-drag={true}
+              className={`${c('item-pin')} clickable-icon`}
+              aria-label={t('Unpin card')}
+              title={t('Pinned to top')}
+              disabled={isStatic}
+              // eslint-disable-next-line react/no-unknown-property
+              onDblClick={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                boardModifiers.toggleItemPin(path);
+              }}
+            >
+              <Icon name="lucide-pin" />
+            </button>
+          )}
+        </ItemMenuButton>
       </div>
       <ItemMetadata searchQuery={isMatch ? searchQuery : undefined} item={item} />
     </div>

@@ -70,6 +70,7 @@ export function maybeCompleteForMove(
     itemStrings.forEach((str, i) => {
       if (i === thisIndex) {
         next = destinationStateManager.getNewItem(str, checkChars[i]);
+        next = update(next, { data: { pinned: { $set: !!item.data.pinned } } });
       } else {
         replacement = destinationStateManager.getNewItem(str, checkChars[i]);
       }
